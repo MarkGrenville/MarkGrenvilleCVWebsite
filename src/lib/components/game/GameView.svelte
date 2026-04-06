@@ -149,7 +149,7 @@
 >
 	<canvas
 		bind:this={canvasEl}
-		class="block h-full w-full"
+		class="absolute inset-0 z-0 block h-full w-full"
 		style="image-rendering: pixelated;"
 		tabindex="0"
 	></canvas>

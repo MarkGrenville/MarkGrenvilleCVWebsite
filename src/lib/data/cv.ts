@@ -42,6 +42,12 @@ export const viewModes: ViewModeOption[] = [
 		label: 'Game',
 		icon: '▶',
 		description: 'RPG Explorer'
+	},
+	{
+		id: 'chat',
+		label: 'Chat',
+		icon: '💬',
+		description: 'Ask Mark'
 	}
 ];
 

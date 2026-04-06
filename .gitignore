@@ -15,3 +15,4 @@ ui-debug.log
 coverage
 .vercel
 .output
+source_files/

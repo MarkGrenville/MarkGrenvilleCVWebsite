@@ -17,6 +17,7 @@
 	import DocView from '$lib/components/document/DocView.svelte';
 	import GameView from '$lib/components/game/GameView.svelte';
 	import PersonaCard from '$lib/components/card/PersonaCard.svelte';
+	import ChatView from '$lib/components/chat/ChatView.svelte';
 </script>
 
 {#if $viewMode === 'gui'}
@@ -43,4 +44,6 @@
 	<GameView />
 {:else if $viewMode === 'card'}
 	<PersonaCard />
+{:else if $viewMode === 'chat'}
+	<ChatView />
 {/if}

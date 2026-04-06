@@ -186,6 +186,8 @@ export class GameEngine {
 			this.emitEvent({ type: 'dialog', data: this.state.dialog });
 		} else {
 			this.state.dialog = null;
+			this.keys.clear();
+			this.state.inputDirection = null;
 			this.emitEvent({ type: 'dialog', data: null });
 		}
 	}
@@ -324,6 +326,10 @@ export class GameEngine {
 			this.state.transitionTarget = null;
 			this.state.transitionSpawn = null;
 
+			this.keys.clear();
+			this.state.inputDirection = null;
+
+			const loadedMap = getMap(target);
 			const dpr2 = window.devicePixelRatio || 1;
 			const scale2 = this.getScale();
 			const canvasW = this.canvas.width / dpr2 / scale2;
@@ -331,7 +337,7 @@ export class GameEngine {
 			this.camera.x = Math.max(0, spawn.x * 32 - canvasW / 2);
 			this.camera.y = Math.max(0, spawn.y * 32 - canvasH / 2);
 
-			this.emitEvent({ type: 'map_change', data: map.name });
+			this.emitEvent({ type: 'map_change', data: loadedMap.name });
 		} else {
 			this.state.transitionAlpha = Math.max(0, this.state.transitionAlpha - dt * 0.004);
 			if (this.state.transitionAlpha <= 0) {

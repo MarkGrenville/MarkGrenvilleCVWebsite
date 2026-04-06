@@ -39,6 +39,27 @@
 		}
 		responses = responses;
 	}
+
+	function syntaxHighlight(json: string): string {
+		return json.replace(
+			/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+			(match) => {
+				let cls = 'text-[#ce9178]';
+				if (/^"/.test(match)) {
+					if (/:$/.test(match)) {
+						cls = 'text-[#9cdcfe]';
+					}
+				} else if (/true|false/.test(match)) {
+					cls = 'text-[#569cd6]';
+				} else if (/null/.test(match)) {
+					cls = 'text-[#569cd6]';
+				} else {
+					cls = 'text-[#b5cea8]';
+				}
+				return `<span class="${cls}">${match}</span>`;
+			}
+		);
+	}
 </script>
 
 <div class="min-h-screen bg-[#0a0a0a] p-4 md:p-8">
@@ -117,8 +138,8 @@
 													{responses[endpoint.path].status}
 												</span>
 											</div>
-											<div class="max-h-96 overflow-auto rounded-lg border border-border/30 bg-[#0c0c0c] p-4">
-												<pre class="font-mono text-xs leading-relaxed text-text-secondary"><code>{JSON.stringify(responses[endpoint.path].data, null, 2)}</code></pre>
+											<div class="max-h-96 overflow-auto rounded-lg border border-border/30 bg-[#1e1e1e] p-4">
+												<pre class="font-mono text-xs leading-relaxed"><code>{@html syntaxHighlight(JSON.stringify(responses[endpoint.path].data, null, 2))}</code></pre>
 											</div>
 										</div>
 									{/if}

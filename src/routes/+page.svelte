@@ -14,7 +14,6 @@
 	import Terminal from '$lib/components/cli/Terminal.svelte';
 	import SwaggerUI from '$lib/components/swagger/SwaggerUI.svelte';
 	import JsonView from '$lib/components/json/JsonView.svelte';
-	import YamlView from '$lib/components/yaml/YamlView.svelte';
 	import DocView from '$lib/components/document/DocView.svelte';
 </script>
 
@@ -36,8 +35,6 @@
 	<SwaggerUI />
 {:else if $viewMode === 'json'}
 	<JsonView />
-{:else if $viewMode === 'yaml'}
-	<YamlView />
 {:else if $viewMode === 'document'}
 	<DocView />
 {/if}

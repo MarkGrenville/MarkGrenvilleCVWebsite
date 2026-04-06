@@ -12,6 +12,9 @@
 	let inputEl: HTMLInputElement;
 	let terminalEl: HTMLDivElement;
 	let isTyping = $state(false);
+	let suggestion = $state('');
+
+	const COMMAND_LIST = ['help', 'whoami', 'experience', 'skills', 'projects', 'clients', 'cat cover-letter.txt', 'clear'];
 
 	const COMMANDS: Record<string, () => TerminalLine[]> = {
 		help: () => [
@@ -32,6 +35,7 @@
 			{ type: 'output', text: '' },
 			{ type: 'output', text: `Location:  ${cvData.personal.location}` },
 			{ type: 'output', text: `Email:     ${cvData.personal.email}` },
+			{ type: 'output', text: `GitHub:    github.com/MarkGrenville` },
 			{ type: 'output', text: '' },
 			{ type: 'output', text: cvData.personal.summary }
 		],
@@ -111,12 +115,42 @@
 
 	COMMANDS['cat cover-letter.txt'] = COMMANDS['cat cover-letter'];
 
+	function getAutoSuggestion(input: string): string {
+		if (!input) return '';
+		const lower = input.toLowerCase();
+		const match = COMMAND_LIST.find((cmd) => cmd.startsWith(lower) && cmd !== lower);
+		return match ? match.slice(input.length) : '';
+	}
+
+	function updateSuggestion() {
+		suggestion = getAutoSuggestion(currentInput);
+	}
+
+	function getTabCompletion(input: string): string | null {
+		if (!input) return null;
+		const lower = input.toLowerCase();
+		const matches = COMMAND_LIST.filter((cmd) => cmd.startsWith(lower));
+		if (matches.length === 1) return matches[0];
+		if (matches.length > 1) {
+			let common = matches[0];
+			for (const m of matches.slice(1)) {
+				let i = 0;
+				while (i < common.length && i < m.length && common[i] === m[i]) i++;
+				common = common.slice(0, i);
+			}
+			if (common.length > input.length) return common;
+		}
+		return null;
+	}
+
 	async function handleCommand(cmd: string) {
 		const trimmed = cmd.trim().toLowerCase();
 		lines.push({ type: 'input', text: `$ ${cmd}` });
 
 		if (trimmed === 'clear') {
 			lines = [];
+			await tick();
+			inputEl?.focus();
 			return;
 		}
 
@@ -141,6 +175,7 @@
 		lines = lines;
 		await tick();
 		scrollToBottom();
+		inputEl?.focus();
 	}
 
 	function sleep(ms: number) {
@@ -155,9 +190,32 @@
 
 	function handleKeyDown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !isTyping) {
-			handleCommand(currentInput);
+			e.preventDefault();
+			const cmd = currentInput;
 			currentInput = '';
+			suggestion = '';
+			handleCommand(cmd);
+		} else if (e.key === 'Tab') {
+			e.preventDefault();
+			if (suggestion) {
+				currentInput = currentInput + suggestion;
+				suggestion = '';
+			} else {
+				const completion = getTabCompletion(currentInput);
+				if (completion) {
+					currentInput = completion;
+					suggestion = '';
+				}
+			}
+		} else if (e.key === 'ArrowRight' && suggestion) {
+			e.preventDefault();
+			currentInput = currentInput + suggestion;
+			suggestion = '';
 		}
+	}
+
+	function handleInput() {
+		updateSuggestion();
 	}
 
 	function focusInput() {
@@ -170,7 +228,7 @@
 			{ type: 'heading', text: '║     MARK GRENVILLE — CV Terminal         ║' },
 			{ type: 'heading', text: '╚══════════════════════════════════════════╝' },
 			{ type: 'output', text: '' },
-			{ type: 'accent', text: "Type 'help' for available commands." },
+			{ type: 'accent', text: "Type 'help' for available commands. Tab to autocomplete." },
 			{ type: 'output', text: '' }
 		];
 		await tick();
@@ -218,17 +276,25 @@
 			<!-- Input line -->
 			<div class="mt-1 flex items-center gap-2">
 				<span class="text-accent">$</span>
-				<input
-					bind:this={inputEl}
-					bind:value={currentInput}
-					onkeydown={handleKeyDown}
-					class="flex-1 border-none bg-transparent font-mono text-sm text-text outline-none"
-					autocomplete="off"
-					autocorrect="off"
-					autocapitalize="off"
-					spellcheck="false"
-					disabled={isTyping}
-				/>
+				<div class="relative flex-1">
+					<input
+						bind:this={inputEl}
+						bind:value={currentInput}
+						onkeydown={handleKeyDown}
+						oninput={handleInput}
+						class="relative z-10 w-full border-none bg-transparent font-mono text-sm text-text outline-none"
+						autocomplete="off"
+						autocorrect="off"
+						autocapitalize="off"
+						spellcheck="false"
+						disabled={isTyping}
+					/>
+					{#if suggestion}
+						<div class="pointer-events-none absolute left-0 top-0 font-mono text-sm">
+							<span class="invisible">{currentInput}</span><span class="text-text-muted/40">{suggestion}</span>
+						</div>
+					{/if}
+				</div>
 				<span class="cursor-blink text-accent">▌</span>
 			</div>
 		</div>

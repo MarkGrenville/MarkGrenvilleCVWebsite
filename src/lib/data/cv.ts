@@ -26,12 +26,6 @@ export const viewModes: ViewModeOption[] = [
 		description: 'Raw data'
 	},
 	{
-		id: 'yaml',
-		label: 'YAML',
-		icon: '---',
-		description: 'Structured'
-	},
-	{
 		id: 'document',
 		label: 'Document',
 		icon: '⎙',

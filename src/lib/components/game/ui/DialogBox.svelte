@@ -52,9 +52,9 @@
 
 <!-- svelte-ignore a11y_autofocus -->
 <div
+	class="dialog-box"
 	style="
 		position: fixed;
-		bottom: 60px;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 90%;
@@ -116,5 +116,15 @@
 	@keyframes blink-cursor {
 		0%, 100% { opacity: 1; }
 		50% { opacity: 0; }
+	}
+
+	.dialog-box {
+		bottom: 60px;
+	}
+
+	@media (max-width: 767px), (pointer: coarse) {
+		.dialog-box {
+			bottom: 200px;
+		}
 	}
 </style>

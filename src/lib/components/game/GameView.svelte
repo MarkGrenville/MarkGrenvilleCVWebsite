@@ -150,7 +150,7 @@
 
 <div
 	bind:this={containerEl}
-	class="relative h-screen w-full overflow-hidden bg-[#050505]"
+	class="relative h-[calc(100dvh-4rem)] w-full overflow-hidden bg-[#050505] lg:h-screen"
 	style="touch-action: none;"
 >
 	<canvas
@@ -199,7 +199,7 @@
 		{#if facingInteraction && !dialog && !battle && isMobile}
 			<div style="
 				position: absolute;
-				bottom: 170px;
+				bottom: 200px;
 				left: 50%;
 				transform: translateX(-50%);
 				z-index: 200;

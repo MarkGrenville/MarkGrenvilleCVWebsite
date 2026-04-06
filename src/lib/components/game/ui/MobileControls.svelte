@@ -31,7 +31,7 @@
 	}
 </script>
 
-<div class="pointer-events-none absolute bottom-0 left-0 right-0 z-20 flex items-end justify-between px-4 pb-4 md:px-6 md:pb-6">
+<div class="pointer-events-none absolute bottom-0 left-0 right-0 z-[300] flex items-end justify-between px-4 pb-6 md:px-6 md:pb-8" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem))">
 	<!-- D-pad -->
 	<div class="pointer-events-auto relative h-36 w-36 md:h-40 md:w-40">
 		<!-- Up -->

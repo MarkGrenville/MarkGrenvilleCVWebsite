@@ -12,11 +12,11 @@
 	<link rel="sitemap" href="/sitemap.xml" />
 </svelte:head>
 
-<div class="grain min-h-screen bg-base">
+<div class="grain min-h-screen overflow-x-hidden bg-base">
 	<Sidebar />
 	<MobileMenu />
 
-	<main class="lg:ml-64">
+	<main class="overflow-x-hidden lg:ml-64">
 		<div class="pt-16 lg:pt-0">
 			{@render children()}
 		</div>

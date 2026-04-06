@@ -3,7 +3,7 @@
 	import { reveal } from '$lib/utils/animations';
 </script>
 
-<section class="relative px-6 py-32 md:px-12 lg:px-20">
+<section class="relative overflow-hidden px-6 py-32 md:px-12 lg:px-20">
 	<!-- Background accent -->
 	<div
 		class="pointer-events-none absolute left-0 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.04] blur-[100px]"

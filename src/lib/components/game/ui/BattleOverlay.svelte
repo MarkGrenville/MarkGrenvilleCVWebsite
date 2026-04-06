@@ -130,7 +130,7 @@
 	</div>
 
 	<!-- Actions -->
-	<div style="border-top: 1px solid #333; background: #0a0a0a; padding: 12px 16px; flex-shrink: 0;">
+	<div style="border-top: 1px solid #333; background: #0a0a0a; padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)); flex-shrink: 0;">
 		{#if isOver}
 			<button
 				onclick={onEnd}

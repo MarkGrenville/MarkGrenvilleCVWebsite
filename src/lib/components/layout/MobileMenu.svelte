@@ -1,26 +1,37 @@
 <script lang="ts">
-	import { viewMode, sidebarOpen } from '$lib/stores/viewMode';
+	import { page } from '$app/stores';
+	import { sidebarOpen } from '$lib/stores/viewMode';
 	import { viewModes } from '$lib/data/cv';
+	import type { ViewMode } from '$lib/types/cv';
 
-	function selectMode(id: typeof $viewMode) {
-		$viewMode = id;
-		$sidebarOpen = false;
+	function getModeUrl(id: ViewMode): string {
+		return id === 'gui' ? '/' : `/${id}`;
+	}
+
+	function getActiveMode(pathname: string): ViewMode | null {
+		const segment = pathname.split('/')[1] || '';
+		if (segment === 'contact') return null;
+		const valid: ViewMode[] = ['cli', 'swagger', 'json', 'document', 'card', 'game', 'chat'];
+		return valid.includes(segment as ViewMode) ? (segment as ViewMode) : 'gui';
 	}
 
 	function toggleMenu() {
 		$sidebarOpen = !$sidebarOpen;
 	}
+
+	const activeMode: ViewMode | null = $derived(getActiveMode($page.url.pathname));
+	const activeLabel = $derived(activeMode ? (viewModes.find((m) => m.id === activeMode)?.label ?? 'GUI') : 'Contact');
 </script>
 
 <!-- Mobile header bar -->
 <header class="fixed left-0 right-0 top-0 z-50 flex items-center justify-between border-b border-border/40 bg-base/90 px-5 py-4 backdrop-blur-xl lg:hidden">
-	<div class="font-display text-sm font-bold tracking-tight text-text">
+	<a href="/" class="font-display text-sm font-bold tracking-tight text-text">
 		MG<span class="text-accent">.</span>
-	</div>
+	</a>
 
 	<div class="flex items-center gap-3">
 		<span class="font-mono text-[10px] tracking-wider text-text-muted uppercase">
-			{viewModes.find((m) => m.id === $viewMode)?.label}
+			{activeLabel}
 		</span>
 		<button
 			onclick={toggleMenu}
@@ -61,37 +72,44 @@
 				</div>
 				<div class="flex flex-col gap-2">
 					{#each viewModes as mode}
-						<button
-							onclick={() => selectMode(mode.id)}
+						<a
+							href={getModeUrl(mode.id)}
+							onclick={() => ($sidebarOpen = false)}
 							class="group flex items-center gap-3 rounded-lg px-3 py-3 text-left transition-all duration-300
-								{$viewMode === mode.id
+								{activeMode === mode.id
 									? 'bg-accent/10 text-accent'
 									: 'text-text-secondary hover:bg-surface hover:text-text'}"
 						>
 							<span
-								class="flex h-9 w-9 items-center justify-center rounded-md font-mono text-xs font-bold transition-all duration-300
-									{$viewMode === mode.id
+								class="flex h-9 w-9 items-center justify-center rounded-md transition-all duration-300
+									{activeMode === mode.id
 										? 'bg-accent text-base'
 										: 'bg-surface text-text-muted group-hover:text-text-secondary'}"
 							>
-								{mode.icon}
+								{@html mode.icon}
 							</span>
 							<div class="flex flex-col">
 								<span class="text-sm font-semibold">{mode.label}</span>
 								<span class="text-[11px] text-text-muted">{mode.description}</span>
 							</div>
-						</button>
+						</a>
 					{/each}
 					<!-- Contact -->
 					<a
 						href="/contact"
 						onclick={() => ($sidebarOpen = false)}
-						class="group flex items-center gap-3 rounded-lg px-3 py-3 text-left text-text-secondary transition-all duration-300 hover:bg-surface hover:text-text"
+						class="group flex items-center gap-3 rounded-lg px-3 py-3 text-left transition-all duration-300
+							{$page.url.pathname === '/contact'
+								? 'bg-accent/10 text-accent'
+								: 'text-text-secondary hover:bg-surface hover:text-text'}"
 					>
 						<span
-							class="flex h-9 w-9 items-center justify-center rounded-md bg-surface font-mono text-xs font-bold text-text-muted transition-all duration-300 group-hover:text-text-secondary"
+							class="flex h-9 w-9 items-center justify-center rounded-md transition-all duration-300
+								{$page.url.pathname === '/contact'
+									? 'bg-accent text-base'
+									: 'bg-surface text-text-muted group-hover:text-text-secondary'}"
 						>
-							✉
+							<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
 						</span>
 						<div class="flex flex-col">
 							<span class="text-sm font-semibold">Contact</span>

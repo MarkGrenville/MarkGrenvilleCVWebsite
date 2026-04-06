@@ -282,7 +282,7 @@
 						bind:value={currentInput}
 						onkeydown={handleKeyDown}
 						oninput={handleInput}
-						class="relative z-10 w-full border-none bg-transparent font-mono text-sm text-text outline-none"
+						class="relative z-10 w-full border-none bg-transparent font-mono text-sm text-text outline-none caret-transparent"
 						autocomplete="off"
 						autocorrect="off"
 						autocapitalize="off"
@@ -294,8 +294,10 @@
 							<span class="invisible">{currentInput}</span><span class="text-text-muted/40">{suggestion}</span>
 						</div>
 					{/if}
+					<div class="pointer-events-none absolute left-0 top-0 font-mono text-sm">
+						<span class="invisible">{currentInput}</span><span class="cursor-blink text-accent">▌</span>
+					</div>
 				</div>
-				<span class="cursor-blink text-accent">▌</span>
 			</div>
 		</div>
 	</div>

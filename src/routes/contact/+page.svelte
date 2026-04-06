@@ -44,6 +44,15 @@
 
 <svelte:head>
 	<title>Contact — Mark Grenville</title>
+	<meta name="description" content="Get in touch with Mark Grenville — email, phone, WhatsApp, GitHub, and Slack." />
+	<link rel="canonical" href="https://markgrenville.com/contact" />
+	<meta property="og:title" content="Contact — Mark Grenville" />
+	<meta property="og:description" content="Get in touch with Mark Grenville — email, phone, WhatsApp, GitHub, and Slack." />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://markgrenville.com/contact" />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="Contact — Mark Grenville" />
+	<meta name="twitter:description" content="Get in touch with Mark Grenville — email, phone, WhatsApp, GitHub, and Slack." />
 </svelte:head>
 
 <div class="flex min-h-screen items-center justify-center px-6 py-20 md:px-12">

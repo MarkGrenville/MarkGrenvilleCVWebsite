@@ -35,19 +35,6 @@
 					<div class="absolute inset-0 bg-gradient-to-t from-base/60 via-transparent to-transparent"></div>
 				</div>
 
-				<!-- Stats grid -->
-				<div class="grid grid-cols-3 gap-4">
-					{#each [
-						{ value: '13+', label: 'Years' },
-						{ value: '20+', label: 'Platforms' },
-						{ value: '6+', label: 'Yr Toyota' }
-					] as stat, i}
-						<div use:reveal={{ delay: 0.3 + i * 0.1 }} class="glass rounded-xl px-4 py-5 text-center transition-all duration-300 hover:border-accent/40">
-							<div class="font-display text-2xl font-bold text-accent">{stat.value}</div>
-							<div class="mt-1 font-mono text-[10px] tracking-wider text-text-muted uppercase">{stat.label}</div>
-						</div>
-					{/each}
-				</div>
 			</div>
 		</div>
 	</div>

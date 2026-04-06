@@ -97,13 +97,14 @@
 			</a>
 		</div>
 
-		<!-- Scroll indicator -->
-		<div
-			class="absolute bottom-10 left-6 flex flex-col items-center gap-2 transition-all delay-[1200ms] duration-700 md:left-12"
-			style="opacity: {mounted ? 0.4 : 0};"
-		>
-			<div class="h-12 w-[1px] bg-gradient-to-b from-transparent via-text-muted to-transparent"></div>
-			<span class="font-mono text-[9px] tracking-widest text-text-muted uppercase">Scroll</span>
-		</div>
+	</div>
+
+	<!-- Scroll indicator -->
+	<div
+		class="absolute bottom-10 left-6 flex flex-col items-center gap-2 transition-all delay-[1200ms] duration-700 md:left-12"
+		style="opacity: {mounted ? 0.4 : 0};"
+	>
+		<div class="h-12 w-[1px] bg-gradient-to-b from-transparent via-text-muted to-transparent"></div>
+		<span class="font-mono text-[9px] tracking-widest text-text-muted uppercase">Scroll</span>
 	</div>
 </section>

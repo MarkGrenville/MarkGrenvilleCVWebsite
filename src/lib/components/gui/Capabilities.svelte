@@ -25,7 +25,6 @@
 					</div>
 
 					<div class="relative">
-						<div class="mb-4 text-3xl">{cap.icon}</div>
 						<h3 class="mb-2 font-display text-2xl font-bold text-text">{cap.label}</h3>
 						<p class="mb-6 text-sm leading-relaxed text-text-secondary">{cap.description}</p>
 

@@ -7,8 +7,9 @@
 </script>
 
 <svelte:head>
-	<title>Mark Grenville — Software Engineer & Digital Systems Builder</title>
-	<meta name="description" content="CV of Mark Grenville — 13+ years building custom software, platforms, AI workflows, and digital systems." />
+	<meta name="author" content="Mark Grenville" />
+	<meta name="robots" content="index, follow" />
+	<link rel="sitemap" href="/sitemap.xml" />
 </svelte:head>
 
 <div class="grain min-h-screen bg-base">

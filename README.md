@@ -61,6 +61,6 @@ This repo is a live, interactive CV built with SvelteKit, Tailwind CSS, and Fire
 
 ## Contact
 
-- **Email:** info@webfootprint.co.za
+- **Email:** mark@webfootprint.co.za
 - **GitHub:** [github.com/MarkGrenville](https://github.com/MarkGrenville)
 - **Location:** Johannesburg, South Africa

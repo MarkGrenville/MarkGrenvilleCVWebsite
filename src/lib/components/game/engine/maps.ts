@@ -5,7 +5,7 @@ import { cvData } from '$lib/data/cv';
 function createCollisions(tiles: T[][]): boolean[][] {
 	const solid = new Set([
 		T.WALL, T.WATER, T.TREE, T.BUILDING_WALL, T.BUILDING_ROOF,
-		T.DESK, T.MONITOR, T.ARCADE, T.FOUNTAIN, T.FENCE, T.STREETLIGHT
+		T.DESK, T.MONITOR, T.ARCADE, T.FOUNTAIN, T.FENCE, T.STREETLIGHT, T.SIGN
 	]);
 	return tiles.map((row) => row.map((t) => solid.has(t)));
 }

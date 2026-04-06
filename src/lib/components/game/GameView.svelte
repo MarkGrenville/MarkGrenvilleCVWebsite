@@ -21,6 +21,7 @@
 	let playerXp = $state(0);
 	let isMobile = $state(false);
 	let mounted = $state(false);
+	let facingInteraction = $state<string | null>(null);
 
 	function handleGameEvent(event: GameEvent) {
 		switch (event.type) {
@@ -39,9 +40,14 @@
 				locationName = event.data as string;
 				syncStateFromEngine();
 				break;
-			case 'state_update':
+			case 'state_update': {
+				const d = event.data as { facingInteraction?: string | null } | undefined;
+				if (d && 'facingInteraction' in d) {
+					facingInteraction = d.facingInteraction ?? null;
+				}
 				syncStateFromEngine();
 				break;
+			}
 		}
 	}
 
@@ -165,6 +171,55 @@
 			/>
 		{/if}
 
+		{#if facingInteraction && !dialog && !battle && !isMobile}
+			<div style="
+				position: absolute;
+				bottom: 40px;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 200;
+				pointer-events: none;
+			">
+				<div style="
+					background: rgba(10, 10, 10, 0.9);
+					border: 1px solid #D4FF00;
+					border-radius: 6px;
+					padding: 6px 16px;
+					font-family: 'Courier New', monospace;
+					font-size: 12px;
+					color: #D4FF00;
+					white-space: nowrap;
+					animation: bounce-prompt 1s ease-in-out infinite;
+				">
+					{facingInteraction === 'npc' ? '💬' : '📋'} Press SPACE to {facingInteraction === 'npc' ? 'talk' : 'read'}
+				</div>
+			</div>
+		{/if}
+
+		{#if facingInteraction && !dialog && !battle && isMobile}
+			<div style="
+				position: absolute;
+				bottom: 170px;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 200;
+				pointer-events: none;
+			">
+				<div style="
+					background: rgba(10, 10, 10, 0.9);
+					border: 1px solid #D4FF00;
+					border-radius: 6px;
+					padding: 6px 16px;
+					font-family: 'Courier New', monospace;
+					font-size: 12px;
+					color: #D4FF00;
+					white-space: nowrap;
+				">
+					{facingInteraction === 'npc' ? '💬' : '📋'} Tap A to {facingInteraction === 'npc' ? 'talk' : 'read'}
+				</div>
+			</div>
+		{/if}
+
 		{#if dialog && !battle}
 			<DialogBox
 				lines={dialog.lines}
@@ -190,3 +245,10 @@
 		{/if}
 	{/if}
 </div>
+
+<style>
+	@keyframes bounce-prompt {
+		0%, 100% { transform: translateX(-50%) translateY(0); }
+		50% { transform: translateX(-50%) translateY(-4px); }
+	}
+</style>

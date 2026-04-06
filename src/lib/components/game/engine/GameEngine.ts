@@ -23,6 +23,7 @@ export class GameEngine {
 	private keys: Set<string> = new Set();
 	private eventCallback: GameEventCallback;
 	private destroyed = false;
+	private scale = 1;
 
 	constructor(canvas: HTMLCanvasElement, callback: GameEventCallback) {
 		this.canvas = canvas;
@@ -111,59 +112,49 @@ export class GameEngine {
 		if (!this.state.battle || this.state.battle.turn !== 'player' || this.state.battle.animating) return;
 
 		playerAttack(this.state.battle, skill);
-		this.state.battle.shakeEnemy = true;
+		this.emitEvent({ type: 'battle_update', data: { ...this.state.battle } });
 
 		setTimeout(() => {
-			if (!this.state.battle) return;
-			this.state.battle.shakeEnemy = false;
-			this.state.battle.animating = false;
-
-			if (this.state.battle.turn === 'enemy') {
-				setTimeout(() => {
-					if (!this.state.battle) return;
-					enemyAttack(this.state.battle);
-					this.state.battle.shakePlayer = true;
-
-					setTimeout(() => {
-						if (!this.state.battle) return;
-						this.state.battle.shakePlayer = false;
-						this.state.battle.animating = false;
-						this.emitEvent({ type: 'battle_update', data: this.state.battle });
-					}, 400);
-
-					this.emitEvent({ type: 'battle_update', data: this.state.battle });
-				}, 600);
-			} else {
-				this.emitEvent({ type: 'battle_update', data: this.state.battle });
+			if (!this.state.battle || this.state.battle.turn !== 'enemy') {
+				if (this.state.battle) {
+					this.state.battle.animating = false;
+					this.emitEvent({ type: 'battle_update', data: { ...this.state.battle } });
+				}
+				return;
 			}
 
-			this.emitEvent({ type: 'battle_update', data: this.state.battle });
-		}, 400);
+			enemyAttack(this.state.battle);
+			this.emitEvent({ type: 'battle_update', data: { ...this.state.battle } });
+
+			setTimeout(() => {
+				if (!this.state.battle) return;
+				this.state.battle.animating = false;
+				this.emitEvent({ type: 'battle_update', data: { ...this.state.battle } });
+			}, 500);
+		}, 800);
 	}
 
 	handleBattleFlee(): void {
 		if (!this.state.battle || this.state.battle.turn !== 'player' || this.state.battle.animating) return;
 
 		const fled = attemptFlee(this.state.battle);
+		this.emitEvent({ type: 'battle_update', data: { ...this.state.battle } });
+
 		if (fled) {
-			this.endBattle();
+			setTimeout(() => this.endBattle(), 400);
 		} else {
 			setTimeout(() => {
 				if (!this.state.battle) return;
 				enemyAttack(this.state.battle);
-				this.state.battle.shakePlayer = true;
+				this.emitEvent({ type: 'battle_update', data: { ...this.state.battle } });
 
 				setTimeout(() => {
 					if (!this.state.battle) return;
-					this.state.battle.shakePlayer = false;
 					this.state.battle.animating = false;
-					this.emitEvent({ type: 'battle_update', data: this.state.battle });
-				}, 400);
-
-				this.emitEvent({ type: 'battle_update', data: this.state.battle });
-			}, 600);
+					this.emitEvent({ type: 'battle_update', data: { ...this.state.battle } });
+				}, 500);
+			}, 800);
 		}
-		this.emitEvent({ type: 'battle_update', data: this.state.battle });
 	}
 
 	endBattle(): void {
@@ -176,6 +167,8 @@ export class GameEngine {
 			}
 		}
 		this.state.battle = null;
+		this.keys.clear();
+		this.state.inputDirection = null;
 		this.emitEvent({ type: 'battle_end' });
 	}
 
@@ -183,7 +176,7 @@ export class GameEngine {
 		if (!this.state.dialog) return;
 		if (this.state.dialog.currentLine < this.state.dialog.lines.length - 1) {
 			this.state.dialog.currentLine++;
-			this.emitEvent({ type: 'dialog', data: this.state.dialog });
+			this.emitEvent({ type: 'dialog', data: { ...this.state.dialog } });
 		} else {
 			this.state.dialog = null;
 			this.keys.clear();
@@ -198,8 +191,17 @@ export class GameEngine {
 		this.canvas.height = height * dpr;
 		this.canvas.style.width = width + 'px';
 		this.canvas.style.height = height + 'px';
-		this.ctx.scale(dpr, dpr);
+		this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 		this.ctx.imageSmoothingEnabled = false;
+		this.scale = Math.max(1, Math.min(2, Math.floor(height / 400)));
+	}
+
+	private getVirtualSize(): { w: number; h: number } {
+		const dpr = window.devicePixelRatio || 1;
+		return {
+			w: this.canvas.width / dpr / this.scale,
+			h: this.canvas.height / dpr / this.scale
+		};
 	}
 
 	private loop = (time: number): void => {
@@ -214,8 +216,11 @@ export class GameEngine {
 	};
 
 	private update(dt: number, time: number): void {
+		const { w, h } = this.getVirtualSize();
+
 		if (this.state.transitioning) {
 			this.updateTransition(dt);
+			updateCamera(this.state, this.camera, w, h, true);
 			return;
 		}
 
@@ -246,27 +251,26 @@ export class GameEngine {
 		}
 
 		updateNPCs(this.state, dt);
-		const dpr = window.devicePixelRatio || 1;
-		const scale = this.getScale();
-		updateCamera(this.state, this.camera, this.canvas.width / dpr / scale, this.canvas.height / dpr / scale);
-	}
+		updateCamera(this.state, this.camera, w, h, false);
 
-	getScale(): number {
-		const dpr = window.devicePixelRatio || 1;
-		const h = this.canvas.height / dpr;
-		const baseH = 704;
-		return Math.max(1, Math.min(2, h / baseH * 1.2));
+		const facingInteraction = checkInteraction(this.state);
+		this.emitEvent({ type: 'state_update', data: { facingInteraction: facingInteraction?.type || null } });
 	}
 
 	private render(time: number): void {
 		const dpr = window.devicePixelRatio || 1;
 		const w = this.canvas.width / dpr;
 		const h = this.canvas.height / dpr;
-		const scale = this.getScale();
+
+		this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+		this.ctx.fillStyle = '#050505';
+		this.ctx.fillRect(0, 0, w, h);
 
 		this.ctx.save();
-		this.ctx.scale(scale, scale);
-		renderWorld(this.ctx, this.state, this.camera, w / scale, h / scale, time);
+		this.ctx.scale(this.scale, this.scale);
+		const vs = this.getVirtualSize();
+		renderWorld(this.ctx, this.state, this.camera, vs.w, vs.h, time);
 		this.ctx.restore();
 	}
 
@@ -291,7 +295,7 @@ export class GameEngine {
 		if (interaction.type === 'sign' || interaction.type === 'npc') {
 			if (interaction.data) {
 				this.state.dialog = { lines: interaction.data, currentLine: 0 };
-				this.emitEvent({ type: 'dialog', data: this.state.dialog });
+				this.emitEvent({ type: 'dialog', data: { ...this.state.dialog } });
 			}
 		} else if (interaction.type === 'door') {
 			this.startTransition(interaction.target!, interaction.spawnPos!);
@@ -312,8 +316,10 @@ export class GameEngine {
 	}
 
 	private updateTransition(dt: number): void {
-		if (this.state.transitionAlpha < 1) {
-			this.state.transitionAlpha = Math.min(1, this.state.transitionAlpha + dt * 0.004);
+		const speed = dt * 0.006;
+
+		if (this.state.transitionAlpha < 1 && this.state.transitionTarget) {
+			this.state.transitionAlpha = Math.min(1, this.state.transitionAlpha + speed);
 		} else if (this.state.transitionTarget) {
 			const target = this.state.transitionTarget;
 			const spawn = this.state.transitionSpawn!;
@@ -329,17 +335,12 @@ export class GameEngine {
 			this.keys.clear();
 			this.state.inputDirection = null;
 
-			const loadedMap = getMap(target);
-			const dpr2 = window.devicePixelRatio || 1;
-			const scale2 = this.getScale();
-			const canvasW = this.canvas.width / dpr2 / scale2;
-			const canvasH = this.canvas.height / dpr2 / scale2;
-			this.camera.x = Math.max(0, spawn.x * 32 - canvasW / 2);
-			this.camera.y = Math.max(0, spawn.y * 32 - canvasH / 2);
+			clearTileCache();
 
+			const loadedMap = getMap(target);
 			this.emitEvent({ type: 'map_change', data: loadedMap.name });
 		} else {
-			this.state.transitionAlpha = Math.max(0, this.state.transitionAlpha - dt * 0.004);
+			this.state.transitionAlpha = Math.max(0, this.state.transitionAlpha - speed);
 			if (this.state.transitionAlpha <= 0) {
 				this.state.transitioning = false;
 			}
@@ -355,7 +356,7 @@ export class GameEngine {
 			this.state.playerXp,
 			this.state.defeatedBosses
 		);
-		this.emitEvent({ type: 'battle_start', data: this.state.battle });
+		this.emitEvent({ type: 'battle_start', data: { ...this.state.battle } });
 	}
 
 	private emitEvent(event: GameEvent): void {

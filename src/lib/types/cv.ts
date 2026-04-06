@@ -3,6 +3,11 @@ export interface PersonalInfo {
 	title: string;
 	location: string;
 	email: string;
+	phone?: string;
+	whatsapp?: string;
+	github?: string;
+	slack?: string;
+	slackUrl?: string;
 	tagline: string;
 	summary: string;
 	profileImage: string;

@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { BattleState, SkillAttack } from '../engine/types';
-	import { drawBattleEnemy, drawPlayerBattleSprite } from '../engine/sprites';
-	import { onMount } from 'svelte';
 
 	interface Props {
 		battle: BattleState;
@@ -12,156 +10,223 @@
 
 	let { battle, onSkill, onFlee, onEnd }: Props = $props();
 
-	let battleCanvas: HTMLCanvasElement;
 	let showSkills = $state(false);
-	let canvasReady = $state(false);
 
-	onMount(() => {
-		canvasReady = true;
-	});
-
-	$effect(() => {
-		if (!canvasReady || !battleCanvas) return;
-		const ctx = battleCanvas.getContext('2d');
-		if (!ctx) return;
-		const w = battleCanvas.width;
-		const h = battleCanvas.height;
-
-		ctx.clearRect(0, 0, w, h);
-
-		const gradient = ctx.createLinearGradient(0, 0, 0, h);
-		gradient.addColorStop(0, '#0a0a1a');
-		gradient.addColorStop(1, '#050505');
-		ctx.fillStyle = gradient;
-		ctx.fillRect(0, 0, w, h);
-
-		ctx.strokeStyle = '#1a1a2a';
-		ctx.lineWidth = 0.5;
-		for (let i = 0; i < w; i += 20) {
-			ctx.beginPath();
-			ctx.moveTo(i, 0);
-			ctx.lineTo(i, h);
-			ctx.stroke();
-		}
-		for (let i = 0; i < h; i += 20) {
-			ctx.beginPath();
-			ctx.moveTo(0, i);
-			ctx.lineTo(w, i);
-			ctx.stroke();
-		}
-
-		let enemyX = w * 0.65;
-		let enemyY = h * 0.35;
-		if (battle.shakeEnemy) {
-			enemyX += (Math.random() - 0.5) * 8;
-			enemyY += (Math.random() - 0.5) * 8;
-		}
-		drawBattleEnemy(ctx, battle.enemy.name, battle.enemy.spriteColor, enemyX, enemyY, Math.min(w, h) * 0.35);
-
-		let playerX = w * 0.25;
-		let playerY = h * 0.7;
-		if (battle.shakePlayer) {
-			playerX += (Math.random() - 0.5) * 8;
-			playerY += (Math.random() - 0.5) * 8;
-		}
-		drawPlayerBattleSprite(ctx, playerX, playerY, Math.min(w, h) * 0.5);
-	});
+	const enemyHpPct = $derived(Math.max(0, (battle.enemyHp / battle.enemyMaxHp) * 100));
+	const playerHpPct = $derived(Math.max(0, (battle.playerHp / battle.playerMaxHp) * 100));
+	const isOver = $derived(battle.turn === 'victory' || battle.turn === 'defeat');
+	const isPlayerTurn = $derived(battle.turn === 'player' && !battle.animating);
 
 	function handleSkillSelect(skill: SkillAttack) {
 		showSkills = false;
 		onSkill(skill);
 	}
 
-	const enemyHpPct = $derived(Math.max(0, (battle.enemyHp / battle.enemyMaxHp) * 100));
-	const playerHpPct = $derived(Math.max(0, (battle.playerHp / battle.playerMaxHp) * 100));
-	const latestLog = $derived(battle.log[battle.log.length - 1] || '');
-	const isOver = $derived(battle.turn === 'victory' || battle.turn === 'defeat');
+	function hpColor(pct: number): string {
+		if (pct > 50) return '#4ade80';
+		if (pct > 20) return '#fbbf24';
+		return '#ef4444';
+	}
 </script>
 
-<div class="absolute inset-0 z-40 flex flex-col bg-[#050505]">
-	<!-- Enemy info -->
-	<div class="flex items-center justify-between px-4 pt-3 md:px-8 md:pt-4">
-		<div class="w-48 md:w-56">
-			<div class="mb-1 font-mono text-xs font-bold text-[#FAFAFA]">{battle.enemy.name}</div>
-			<div class="h-3 w-full overflow-hidden rounded-full bg-[#1a1a1a]">
-				<div
-					class="h-full rounded-full transition-all duration-500"
-					style="width: {enemyHpPct}%; background: {enemyHpPct > 50 ? '#4ade80' : enemyHpPct > 20 ? '#fbbf24' : '#ef4444'}"
-				></div>
+<div style="
+	position: fixed;
+	inset: 0;
+	z-index: 99998;
+	background: #050505;
+	display: flex;
+	flex-direction: column;
+	font-family: 'Courier New', Courier, monospace;
+">
+	<!-- Enemy section -->
+	<div style="padding: 16px 20px 8px; flex-shrink: 0;">
+		<div style="max-width: 280px;">
+			<div style="color: #FAFAFA; font-size: 16px; font-weight: bold; margin-bottom: 6px;">
+				{battle.enemy.name}
 			</div>
-			<div class="mt-0.5 font-mono text-[10px] text-[#888]">HP {battle.enemyHp}/{battle.enemyMaxHp}</div>
+			<div style="background: #1a1a1a; border-radius: 10px; height: 14px; overflow: hidden; border: 1px solid #333;">
+				<div style="height: 100%; border-radius: 10px; transition: width 0.5s; width: {enemyHpPct}%; background: {hpColor(enemyHpPct)};"></div>
+			</div>
+			<div style="color: #888; font-size: 11px; margin-top: 3px;">HP {battle.enemyHp} / {battle.enemyMaxHp}</div>
 		</div>
 	</div>
 
-	<!-- Battle canvas -->
-	<div class="relative flex flex-1 items-center justify-center">
-		<canvas bind:this={battleCanvas} width={400} height={240} class="h-full w-full" style="image-rendering: pixelated;"></canvas>
-	</div>
+	<!-- Battle arena -->
+	<div style="flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; min-height: 150px;">
+		<!-- Battle grid background -->
+		<div style="position: absolute; inset: 0; opacity: 0.15;">
+			{#each Array(20) as _, i}
+				<div style="position: absolute; left: {i * 5}%; top: 0; bottom: 0; width: 1px; background: #D4FF00;"></div>
+			{/each}
+			{#each Array(10) as _, i}
+				<div style="position: absolute; top: {i * 10}%; left: 0; right: 0; height: 1px; background: #D4FF00;"></div>
+			{/each}
+		</div>
 
-	<!-- Player info -->
-	<div class="flex items-center justify-end px-4 md:px-8">
-		<div class="w-48 md:w-56">
-			<div class="mb-1 font-mono text-xs font-bold text-[#D4FF00]">MARK</div>
-			<div class="h-3 w-full overflow-hidden rounded-full bg-[#1a1a1a]">
-				<div
-					class="h-full rounded-full transition-all duration-500"
-					style="width: {playerHpPct}%; background: {playerHpPct > 50 ? '#4ade80' : playerHpPct > 20 ? '#fbbf24' : '#ef4444'}"
-				></div>
-			</div>
-			<div class="mt-0.5 font-mono text-[10px] text-[#888]">HP {battle.playerHp}/{battle.playerMaxHp} | XP {battle.playerXp}</div>
+		<!-- Enemy sprite -->
+		<div style="
+			position: absolute;
+			right: 15%;
+			top: 20%;
+			font-size: 64px;
+			filter: {battle.shakeEnemy ? 'brightness(2)' : 'none'};
+			transform: {battle.shakeEnemy ? 'translateX(4px)' : 'none'};
+			transition: filter 0.2s, transform 0.1s;
+		">
+			{#if battle.enemy.name === 'Bug Swarm'}
+				<div style="color: {battle.enemy.spriteColor}; text-shadow: 0 0 20px {battle.enemy.spriteColor};">🐛🐛🐛</div>
+			{:else if battle.enemy.name === 'Legacy Codebase'}
+				<div style="color: {battle.enemy.spriteColor}; text-shadow: 0 0 20px {battle.enemy.spriteColor};">
+					<div style="font-size: 48px;">📟</div>
+					<div style="font-size: 10px; color: #ff4444; text-align: center;">DEPRECATED</div>
+				</div>
+			{:else if battle.enemy.name === 'Scope Creep'}
+				<div style="color: {battle.enemy.spriteColor}; text-shadow: 0 0 20px {battle.enemy.spriteColor};">🐙</div>
+			{:else if battle.enemy.name === 'Deadline Dragon'}
+				<div style="color: {battle.enemy.spriteColor}; text-shadow: 0 0 20px {battle.enemy.spriteColor};">🐉</div>
+			{:else}
+				<div style="color: {battle.enemy.spriteColor}; text-shadow: 0 0 20px {battle.enemy.spriteColor};">👾</div>
+			{/if}
+		</div>
+
+		<!-- Player sprite -->
+		<div style="
+			position: absolute;
+			left: 15%;
+			bottom: 15%;
+			font-size: 52px;
+			filter: {battle.shakePlayer ? 'brightness(2)' : 'none'};
+			transform: {battle.shakePlayer ? 'translateX(-4px)' : 'none'};
+			transition: filter 0.2s, transform 0.1s;
+		">
+			<div>🧑‍💻</div>
+			<div style="font-size: 10px; color: #D4FF00; text-align: center; font-weight: bold;">MARK</div>
 		</div>
 	</div>
 
-	<!-- Log -->
-	<div class="border-t border-[#333] bg-[#0a0a0a] px-4 py-2 md:px-8">
-		<p class="font-mono text-xs text-[#FAFAFA] md:text-sm">{latestLog}</p>
+	<!-- Player HP -->
+	<div style="padding: 8px 20px; flex-shrink: 0;">
+		<div style="max-width: 280px; margin-left: auto;">
+			<div style="color: #D4FF00; font-size: 14px; font-weight: bold; margin-bottom: 4px; text-align: right;">MARK</div>
+			<div style="background: #1a1a1a; border-radius: 10px; height: 14px; overflow: hidden; border: 1px solid #333;">
+				<div style="height: 100%; border-radius: 10px; transition: width 0.5s; width: {playerHpPct}%; background: {hpColor(playerHpPct)};"></div>
+			</div>
+			<div style="color: #888; font-size: 11px; margin-top: 3px; text-align: right;">
+				HP {battle.playerHp} / {battle.playerMaxHp} &nbsp;|&nbsp; XP {battle.playerXp}
+			</div>
+		</div>
+	</div>
+
+	<!-- Battle log -->
+	<div style="border-top: 1px solid #333; background: #0a0a0a; padding: 10px 20px; flex-shrink: 0;">
+		<div style="color: #FAFAFA; font-size: 13px; min-height: 1.5em;">
+			{battle.log[battle.log.length - 1] || ''}
+		</div>
+		{#if battle.log.length > 1}
+			<div style="color: #555; font-size: 11px; margin-top: 2px;">
+				{battle.log[battle.log.length - 2] || ''}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Actions -->
-	<div class="border-t border-[#333] bg-[#0a0a0a] p-3 md:p-4">
+	<div style="border-top: 1px solid #333; background: #0a0a0a; padding: 12px 16px; flex-shrink: 0;">
 		{#if isOver}
 			<button
 				onclick={onEnd}
-				class="w-full rounded-lg bg-[#D4FF00] px-4 py-3 font-mono text-sm font-bold text-[#050505] transition-transform hover:scale-[1.02] active:scale-95"
+				style="
+					width: 100%;
+					padding: 14px;
+					background: #D4FF00;
+					color: #050505;
+					border: none;
+					border-radius: 8px;
+					font-family: 'Courier New', monospace;
+					font-size: 15px;
+					font-weight: bold;
+					cursor: pointer;
+				"
 			>
-				{battle.turn === 'victory' ? 'VICTORY! Continue' : 'Try Again...'}
+				{battle.turn === 'victory' ? '🎉 VICTORY! Continue' : '💀 Defeated... Try Again'}
 			</button>
 		{:else if showSkills}
-			<div class="grid grid-cols-2 gap-2">
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
 				{#each battle.playerSkills.slice(0, 4) as skill}
 					<button
 						onclick={() => handleSkillSelect(skill)}
-						disabled={battle.turn !== 'player' || battle.animating}
-						class="rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2 text-left font-mono text-xs text-[#FAFAFA] transition-colors hover:border-[#D4FF00] hover:text-[#D4FF00] disabled:opacity-40"
+						disabled={!isPlayerTurn}
+						style="
+							padding: 10px 12px;
+							background: {isPlayerTurn ? '#1a1a1a' : '#111'};
+							color: {isPlayerTurn ? '#FAFAFA' : '#555'};
+							border: 1px solid {isPlayerTurn ? '#444' : '#222'};
+							border-radius: 8px;
+							font-family: 'Courier New', monospace;
+							font-size: 12px;
+							text-align: left;
+							cursor: {isPlayerTurn ? 'pointer' : 'not-allowed'};
+						"
 					>
-						<span class="block font-bold">{skill.name}</span>
-						<span class="text-[10px] text-[#888]">PWR {skill.power}</span>
+						<div style="font-weight: bold;">{skill.name}</div>
+						<div style="color: #888; font-size: 10px; margin-top: 2px;">PWR {skill.power} • {skill.category}</div>
 					</button>
 				{/each}
 			</div>
 			<button
 				onclick={() => showSkills = false}
-				class="mt-2 w-full font-mono text-[10px] text-[#888] hover:text-[#D4FF00]"
+				style="width: 100%; margin-top: 8px; padding: 6px; background: none; border: none; color: #888; font-family: monospace; font-size: 11px; cursor: pointer;"
 			>
-				BACK
+				← BACK
 			</button>
 		{:else}
-			<div class="grid grid-cols-2 gap-2">
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
 				<button
 					onclick={() => showSkills = true}
-					disabled={battle.turn !== 'player' || battle.animating}
-					class="rounded-lg border border-[#D4FF00] bg-[#D4FF00]/10 px-4 py-3 font-mono text-sm font-bold text-[#D4FF00] transition-colors hover:bg-[#D4FF00]/20 disabled:opacity-40"
+					disabled={!isPlayerTurn}
+					style="
+						padding: 14px;
+						background: {isPlayerTurn ? 'rgba(212,255,0,0.15)' : '#111'};
+						color: {isPlayerTurn ? '#D4FF00' : '#555'};
+						border: 2px solid {isPlayerTurn ? '#D4FF00' : '#222'};
+						border-radius: 8px;
+						font-family: 'Courier New', monospace;
+						font-size: 15px;
+						font-weight: bold;
+						cursor: {isPlayerTurn ? 'pointer' : 'not-allowed'};
+					"
 				>
-					FIGHT
+					⚔️ FIGHT
 				</button>
 				<button
 					onclick={onFlee}
-					disabled={battle.turn !== 'player' || battle.animating}
-					class="rounded-lg border border-[#333] bg-[#1a1a1a] px-4 py-3 font-mono text-sm font-bold text-[#FAFAFA] transition-colors hover:border-[#888] disabled:opacity-40"
+					disabled={!isPlayerTurn}
+					style="
+						padding: 14px;
+						background: {isPlayerTurn ? '#1a1a1a' : '#111'};
+						color: {isPlayerTurn ? '#FAFAFA' : '#555'};
+						border: 2px solid {isPlayerTurn ? '#333' : '#222'};
+						border-radius: 8px;
+						font-family: 'Courier New', monospace;
+						font-size: 15px;
+						font-weight: bold;
+						cursor: {isPlayerTurn ? 'pointer' : 'not-allowed'};
+					"
 				>
-					RUN
+					🏃 RUN
 				</button>
 			</div>
+			{#if !isPlayerTurn && !isOver}
+				<div style="text-align: center; margin-top: 8px; color: #888; font-size: 11px; animation: pulse 1s infinite;">
+					Enemy is attacking...
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>
+
+<style>
+	@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.4; }
+	}
+</style>

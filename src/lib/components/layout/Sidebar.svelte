@@ -51,6 +51,22 @@
 						{/if}
 					</button>
 				{/each}
+
+				<!-- Contact -->
+				<a
+					href="/contact"
+					class="group flex items-center gap-3 rounded-lg px-3 py-3 text-left text-text-secondary transition-all duration-300 hover:bg-surface hover:text-text"
+				>
+					<span
+						class="flex h-8 w-8 items-center justify-center rounded-md bg-surface font-mono text-xs font-bold text-text-muted transition-all duration-300 group-hover:bg-card group-hover:text-text-secondary"
+					>
+						✉
+					</span>
+					<div class="flex flex-col">
+						<span class="text-sm font-semibold">Contact</span>
+						<span class="text-[11px] text-text-muted">Get in touch</span>
+					</div>
+				</a>
 			</div>
 		</nav>
 

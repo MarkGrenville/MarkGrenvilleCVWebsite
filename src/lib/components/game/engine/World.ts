@@ -16,30 +16,40 @@ export function getMap(name: string): MapData {
 	return maps[name];
 }
 
-export function updateCamera(state: GameState, camera: Camera, canvasW: number, canvasH: number): void {
+function getCameraTarget(state: GameState, canvasW: number, canvasH: number): { x: number; y: number } {
 	const playerScreen = getPlayerScreenPos(state);
 	const map = getMap(state.currentMap);
-
 	const mapW = map.width * TILE_SIZE;
 	const mapH = map.height * TILE_SIZE;
 
-	let targetX: number;
-	let targetY: number;
+	let x: number;
+	let y: number;
 
 	if (mapW <= canvasW) {
-		targetX = -(canvasW - mapW) / 2;
+		x = -(canvasW - mapW) / 2;
 	} else {
-		targetX = Math.max(0, Math.min(mapW - canvasW, playerScreen.x - canvasW / 2 + TILE_SIZE / 2));
+		x = Math.max(0, Math.min(mapW - canvasW, playerScreen.x - canvasW / 2 + TILE_SIZE / 2));
 	}
 
 	if (mapH <= canvasH) {
-		targetY = -(canvasH - mapH) / 2;
+		y = -(canvasH - mapH) / 2;
 	} else {
-		targetY = Math.max(0, Math.min(mapH - canvasH, playerScreen.y - canvasH / 2 + TILE_SIZE / 2));
+		y = Math.max(0, Math.min(mapH - canvasH, playerScreen.y - canvasH / 2 + TILE_SIZE / 2));
 	}
 
-	camera.x += (targetX - camera.x) * 0.1;
-	camera.y += (targetY - camera.y) * 0.1;
+	return { x, y };
+}
+
+export function updateCamera(state: GameState, camera: Camera, canvasW: number, canvasH: number, snap: boolean): void {
+	const target = getCameraTarget(state, canvasW, canvasH);
+
+	if (snap) {
+		camera.x = target.x;
+		camera.y = target.y;
+	} else {
+		camera.x += (target.x - camera.x) * 0.12;
+		camera.y += (target.y - camera.y) * 0.12;
+	}
 }
 
 export function renderWorld(

@@ -56,7 +56,12 @@ export const cvData: CVData = {
 		name: 'Mark Grenville',
 		title: 'Software Engineer & Digital Systems Builder',
 		location: 'Johannesburg, South Africa',
-		email: 'info@webfootprint.co.za',
+		email: 'mark@webfootprint.co.za',
+		phone: '+27 84 590 2401',
+		whatsapp: '+27 84 590 2401',
+		github: 'https://github.com/MarkGrenville',
+		slack: 'Mark Grenville',
+		slackUrl: 'https://webfootprint.slack.com/team/U4W79E8D7',
 		tagline: 'Building technology that makes people and businesses more capable.',
 		summary:
 			'Senior digital systems builder with 13+ years of hands-on experience across custom software, web platforms, business automation, AI-assisted workflows, and interactive digital products. I operate at the intersection of business need, technical implementation, and workflow design — helping organisations turn complex operational challenges into practical, scalable digital systems.',

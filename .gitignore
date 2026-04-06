@@ -16,3 +16,5 @@ coverage
 .vercel
 .output
 source_files/
+functions/build/
+functions/node_modules/

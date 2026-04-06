@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Dev Environment",
+      "type": "shell",
+      "command": "pm2 start ecosystem.config.cjs",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Stop Dev Environment",
+      "type": "shell",
+      "command": "pm2 stop cv-mark-frontend cv-mark-emulator",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "View Logs",
+      "type": "shell",
+      "command": "pm2 logs cv-mark-frontend --lines 50",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

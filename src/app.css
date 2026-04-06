@@ -1,0 +1,149 @@
+@import 'tailwindcss';
+
+@theme {
+	--color-base: #050505;
+	--color-surface: #111111;
+	--color-card: #1a1a1a;
+	--color-accent: #D4FF00;
+	--color-accent-dim: #a3c200;
+	--color-text: #FAFAFA;
+	--color-text-secondary: #888888;
+	--color-text-muted: #444444;
+	--color-border: #333333;
+	--color-border-hover: #D4FF00;
+
+	--font-display: 'Space Grotesk', system-ui, sans-serif;
+	--font-body: 'Inter', system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+	--spacing-section: 8rem;
+	--spacing-section-sm: 5rem;
+}
+
+html {
+	background-color: var(--color-base);
+	color: var(--color-text);
+	font-family: var(--font-body);
+	scroll-behavior: smooth;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+
+::selection {
+	background-color: var(--color-accent);
+	color: var(--color-base);
+}
+
+/* Grain overlay */
+.grain::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	pointer-events: none;
+	opacity: 0.035;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+	background-repeat: repeat;
+	background-size: 256px 256px;
+}
+
+/* Glow utility */
+.glow-accent {
+	box-shadow: 0 0 40px rgba(212, 255, 0, 0.15), 0 0 80px rgba(212, 255, 0, 0.05);
+}
+
+.glow-accent-strong {
+	box-shadow: 0 0 60px rgba(212, 255, 0, 0.25), 0 0 120px rgba(212, 255, 0, 0.1);
+}
+
+/* Scroll reveal animation */
+.reveal {
+	opacity: 0;
+	transform: translateY(30px);
+	transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+/* Stagger delays */
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* Glass card */
+.glass {
+	background: rgba(26, 26, 26, 0.8);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border: 1px solid var(--color-border);
+}
+
+/* Accent line animation */
+@keyframes accent-line-grow {
+	from { width: 0; }
+	to { width: 100%; }
+}
+
+.accent-line-animate {
+	animation: accent-line-grow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Text mask reveal */
+@keyframes text-reveal-up {
+	from {
+		clip-path: inset(100% 0 0 0);
+		transform: translateY(20px);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+		transform: translateY(0);
+	}
+}
+
+.text-reveal {
+	animation: text-reveal-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	animation-play-state: paused;
+}
+
+.text-reveal.play {
+	animation-play-state: running;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-base);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-border);
+	border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-text-muted);
+}
+
+/* Cursor blink for CLI */
+@keyframes blink {
+	0%, 50% { opacity: 1; }
+	51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+	animation: blink 1s step-end infinite;
+}

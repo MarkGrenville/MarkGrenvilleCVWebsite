@@ -53,7 +53,7 @@ export interface CVData {
 	whyAI: string[];
 }
 
-export type ViewMode = 'gui' | 'cli' | 'swagger' | 'json' | 'yaml' | 'document';
+export type ViewMode = 'gui' | 'cli' | 'swagger' | 'json' | 'document' | 'card' | 'game';
 
 export interface ViewModeOption {
 	id: ViewMode;

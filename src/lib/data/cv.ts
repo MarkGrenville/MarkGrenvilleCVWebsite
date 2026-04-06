@@ -30,6 +30,18 @@ export const viewModes: ViewModeOption[] = [
 		label: 'Document',
 		icon: '⎙',
 		description: 'Printable'
+	},
+	{
+		id: 'card',
+		label: 'Card',
+		icon: '◎',
+		description: 'Persona card'
+	},
+	{
+		id: 'game',
+		label: 'Game',
+		icon: '▶',
+		description: 'RPG Explorer'
 	}
 ];
 

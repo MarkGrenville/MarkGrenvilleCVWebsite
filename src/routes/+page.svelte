@@ -15,6 +15,8 @@
 	import SwaggerUI from '$lib/components/swagger/SwaggerUI.svelte';
 	import JsonView from '$lib/components/json/JsonView.svelte';
 	import DocView from '$lib/components/document/DocView.svelte';
+	import GameView from '$lib/components/game/GameView.svelte';
+	import PersonaCard from '$lib/components/card/PersonaCard.svelte';
 </script>
 
 {#if $viewMode === 'gui'}
@@ -37,4 +39,8 @@
 	<JsonView />
 {:else if $viewMode === 'document'}
 	<DocView />
+{:else if $viewMode === 'game'}
+	<GameView />
+{:else if $viewMode === 'card'}
+	<PersonaCard />
 {/if}

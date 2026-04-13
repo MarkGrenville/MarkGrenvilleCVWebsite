@@ -1,0 +1,46 @@
+{
+  "id": "cv-mark",
+  "name": "CV Mark Grenville",
+  "description": "Professional CV website with multiple view modes (GUI, CLI, Swagger, JSON, YAML, Document)",
+  "focusIdentifier": "markgrenville",
+  "projectPath": "/Users/markgrenville/Projects/markgrenville",
+  "firebaseProjectId": "cv-mark-grenville",
+  "services": [
+    {
+      "name": "Frontend",
+      "port": 8520,
+      "url": "http://localhost:8520",
+      "purpose": "SvelteKit dev server"
+    },
+    {
+      "name": "Emulator UI",
+      "port": 8521,
+      "url": "http://localhost:8521",
+      "purpose": "Firebase Emulator Suite UI"
+    },
+    {
+      "name": "Firestore",
+      "port": 8522,
+      "url": "http://localhost:8522",
+      "purpose": "Firestore emulator"
+    },
+    {
+      "name": "Auth",
+      "port": 8523,
+      "url": "http://localhost:8523",
+      "purpose": "Auth emulator"
+    },
+    {
+      "name": "Hosting",
+      "port": 8524,
+      "url": "http://localhost:8524",
+      "purpose": "Firebase Hosting emulator"
+    },
+    {
+      "name": "Storage",
+      "port": 8525,
+      "url": "http://localhost:8525",
+      "purpose": "Firebase Storage emulator"
+    }
+  ]
+}
